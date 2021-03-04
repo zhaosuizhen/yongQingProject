@@ -1,0 +1,777 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+<title>轨迹回放</title>
+
+<link rel="stylesheet" href="tool/css/demo-center.css" />
+<link rel="stylesheet" href="tool/layui/css/layui.css" />
+<!-- <link href="https://vjs.zencdn.net/7.4.1/video-js.css" rel="stylesheet"> -->
+<link href="http://vjs.zencdn.net/5.20.1/video-js.css" rel="stylesheet">
+
+
+
+<script type="text/javascript" src="tool/layui/layui.js"></script>
+<!-- <script src='https://vjs.zencdn.net/7.4.1/video.js'></script> -->
+<script src="http://vjs.zencdn.net/5.20.1/video.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/videojs-flash@2/dist/videojs-flash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-hls/5.15.0/videojs-contrib-hls.min.js" type="text/javascript"></script>
+
+<style type="text/css">
+.amap-logo {
+	display: none;
+	opacity: 0 !important;
+}
+
+.amap-copyright {
+	opacity: 0;
+}
+.video-js .vjs-tech {position: relative !important;}
+</style>
+</head>
+<body>
+	<div class="left">
+		<div class="top">
+			<div class="realTimeInfo">
+				<h3 style="margin-top:7px;margin-left:3px;color:#fff">实时信息</h3>
+				<button id="realTimeBtn" type="button" style="position: absolute;top:4px;right:4px;background:#05CDE2" class="layui-btn layui-btn-sm">播放</button>
+				<ul class="realTimeInfo_ul">
+					<li>种类：<span class="strawType"></span></li>
+					<li>重量(KG)：<span class="strawWeight"></span></li>
+					<li>车牌：<span class="licensePlateNumber"></span></li>
+					<li>司机：<span class="driverName"></span></li>
+					<li>车辆状态：<span class="vehicleStatus"></span></li>
+					<li>车辆油路：<span class="vehicleOilWay"></span></li>
+					<li>车辆电路：<span class="vehicleCircuit"></span></li>
+					<li>经度：<span class="longitude"></span></li>
+					<li>纬度：<span class="latitude"></span></li>
+					<li>更新时间：<span class="updateTime"></span></li>
+				</ul>
+			</div>
+		
+			<div class="mapBox">
+				<div id="container"></div>
+				<!-- <div class="input-card">
+					<h4>轨迹回放控制</h4>
+					<div class="input-item">
+						<input type="button" class="btn" value="开始动画" id="end" onclick="startAnimation()" /> <input type="button" class="btn" value="暂停动画" id="pause" onclick="pauseAnimation()" />
+					</div>
+					<div class="input-item">
+						<input type="button" class="btn" value="继续动画" id="resume" onclick="resumeAnimation()" /> <input type="button" class="btn" value="停止动画" id="stop" onclick="stopAnimation()" />
+					</div>
+				</div> -->
+			</div>
+
+		</div>
+		
+		<div class="historyData">
+			<h3 id="historyH3" style="margin-top:7px;margin-left:3px;color:#fff">历史数据</h3>
+			<div class="searchBox">
+				<span>选择时间：</span>
+				<input type="text" class="layui-input" id="startTime" style="width:180px">
+				<!-- <span>结束时间：</span>
+				<input type="text" class="layui-input" id="endTime" style="width:180px"> -->
+				<button id="historyDataBtn" type="button" style="background:#05CDE2" class="layui-btn layui-btn-sm">查询</button>
+			</div>
+			<div class="historyHeader">
+				<span class="xvHao">序号</span>
+				<span class="shuLiang">设备数量</span>
+				<span class="zhongLiang">重量(KG)</span>
+				<span class="zhongLei">种类</span>
+				<span class="chePai">车牌</span>
+				<span class="siJi">司机</span>
+				<span class="kaiShi">起始时间</span>
+				<span class="jieShu">结束时间</span>
+				<span class="qiShi">起始坐标</span>
+				<span class="zhongDian">终点坐标</span>
+				<span class="caoZuo">操作</span>
+			</div>
+			<ul class="historyDataUl" id="historyDataUl"></ul>
+			<div class="page" id="page"></div>
+
+		</div>
+	</div>
+
+	<div class="right">
+		<div class="videoBox">
+			<div id="video1" class="video video_top">
+        		<iframe id="video_1" src="http://39.104.114.103:8080/video/video.html?url=ws%3A%2F%2F10.129.211.228%3A8080%2Flive%2F95fb7a8a-814a-4b3f-ab59-ae22440ba921.flv%3Fst%3D1606284774672" style="margin-left:7%;width:86%; height:100%;"></iframe>
+				<video id="myVideo1" class="video-js vjs-default-skin vjs-big-play-centered" controls autoplay preload="auto" data-setup='{}' style='width: 100%;height: 100%;display: none;'>
+					<source id="source_1" src="http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8" type="application/x-mpegURL"></source>
+				</video>
+			</div>
+
+			<div id="video2" class="video video_center">
+        		<iframe id="video_2" src="http://39.104.114.103:8080/video/video.html?url=ws%3A%2F%2F10.129.211.228%3A8080%2Flive%2F95fb7a8a-814a-4b3f-ab59-ae22440ba921.flv%3Fst%3D1606284774672" style="margin-left:7%;width:86%; height:100%;"></iframe>
+				<video id="myVideo2" class="video-js vjs-default-skin vjs-big-play-centered" controls autoplay preload="auto" data-setup='{}' style='width: 100%;height: 100%;display: none;'>
+					<source id="source_2" src="http://ivi.bupt.edu.cn/hls/cctv2hd.m3u8" type="application/x-mpegURL"></source>
+				</video>
+			</div>
+
+			<div id="video3" class="video video_bottom">
+				<video id="myVideo3" class="video-js vjs-default-skin vjs-big-play-centered" controls autoplay  preload="auto" data-setup="{}" style='width: 100%;height: 100%' poster="">
+					<source id="source_3" src="src" type="rtmp/flv">
+				</video>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=4a6c7cafec98c795511d37856402e56d"></script>
+<script type="text/javascript" src="tool/js/jquery-1.9.0.min.js"></script>
+<!-- <script type="text/javascript" src="tool/js/amap.js"></script> -->
+<script type="text/javascript" src="tool/js/map1.js"></script>
+</html>
+
+<script>
+	window.onload = function () { 
+		const baseUrl = 'http://39.104.114.103:18089'
+		const videoSrcBaseUrl = 'http://10.129.211.228:8080'
+
+		var startTime = ''
+		var endTime = ''
+		var historyList = []
+		var realTimeLicensePlateNumber = ''
+		var realTimeStrawWeight = ''
+		var realTimeSstrawType = ''
+
+		let myVideoList_1 = []
+		let myVideo1_index = 1
+
+		
+        var PI = 3.1415926535897932384626;
+
+        var a = 6378245.0;
+
+        var ee = 0.00669342162296594323;
+        
+        function wgs84togcj02(lng, lat) {
+            if (out_of_china(lng, lat)) {
+
+                return [ lng, lat ]
+
+            } else {
+
+                var dlat = transformlat(lng - 105.0, lat - 35.0);
+
+                var dlng = transformlng(lng - 105.0, lat - 35.0);
+
+                var radlat = lat / 180.0 * PI;
+
+                var magic = Math.sin(radlat);
+
+                magic = 1 - ee * magic * magic;
+
+                var sqrtmagic = Math.sqrt(magic);
+
+                dlat = (dlat * 180.0) / ((a * (1 - ee)) / (magic * sqrtmagic) * PI);
+
+                dlng = (dlng * 180.0) / (a / sqrtmagic * Math.cos(radlat) * PI);
+
+                var mglat = lat + dlat;
+
+                var mglng = lng + dlng;
+
+                return [ mglng, mglat ]
+
+            }
+
+        }
+
+        function transformlat(lng, lat) {
+            var ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * Math.sqrt(Math.abs(lng));
+
+            ret += (20.0 * Math.sin(6.0 * lng * PI) + 20.0 * Math.sin(2.0 * lng * PI)) * 2.0 / 3.0;
+
+            ret += (20.0 * Math.sin(lat * PI) + 40.0 * Math.sin(lat / 3.0 * PI)) * 2.0 / 3.0;
+
+            ret += (160.0 * Math.sin(lat / 12.0 * PI) + 320 * Math.sin(lat * PI / 30.0)) * 2.0 / 3.0;
+
+            return ret
+
+        }
+
+        function transformlng(lng, lat) {
+            var ret = 300.0 + lng + 2.0 * lat + 0.1 * lng * lng + 0.1 * lng * lat + 0.1 * Math.sqrt(Math.abs(lng));
+
+            ret += (20.0 * Math.sin(6.0 * lng * PI) + 20.0 * Math.sin(2.0 * lng * PI)) * 2.0 / 3.0;
+
+            ret += (20.0 * Math.sin(lng * PI) + 40.0 * Math.sin(lng / 3.0 * PI)) * 2.0 / 3.0;
+
+            ret += (150.0 * Math.sin(lng / 12.0 * PI) + 300.0 * Math.sin(lng / 30.0 * PI)) * 2.0 / 3.0;
+
+            return ret
+
+        }
+
+        function out_of_china(lng, lat) {
+            return (lng < 72.004 || lng > 137.8347) || ((lat < 0.8293 || lat > 55.8271) || false);
+
+        }
+
+		var myVideo1 = videojs('myVideo1', { "poster": "", "controls": "true" }, function() {
+            this.on('play', function() {
+                console.log('正在播放');
+            });
+            //暂停--播放完毕后也会暂停
+            this.on('pause', function() {
+				console.log("暂停中")
+            });
+            // 结束
+            this.on('ended', function() {
+				console.log('结束');
+				if(myVideo1_index < myVideoList_1.length){
+					myVideo1.src({
+						src: myVideoList_1[myVideo1_index],
+						type: 'application/x-mpegURL'
+					})
+					myVideo1.load();
+					myVideo1.play();
+					myVideo1_index++
+				}else{
+					return
+				}
+            })
+		})
+		
+
+		let myVideoList_2 = []
+		let myVideo2_index = 1
+
+		var myVideo2 = videojs('myVideo2', { "poster": "", "controls": "true" }, function() {
+            this.on('play', function() {
+                console.log('正在播放');
+            });
+            //暂停--播放完毕后也会暂停
+            this.on('pause', function() {
+				console.log("暂停中")
+            });
+            // 结束
+            this.on('ended', function() {
+                console.log('结束');
+				if(myVideo2_index < myVideoList_2.length){
+					myVideo2.src({
+						src: myVideoList_2[myVideo2_index],
+						type: 'application/x-mpegURL'
+					})
+					myVideo2.load();
+					myVideo2.play();
+					myVideo2_index++
+				}else{
+					return
+				}
+            })
+        })
+
+
+		var myVideo3 = videojs('myVideo3', {
+			bigPlayButton: true,
+			textTrackDisplay: true,
+			posterImage: true,
+			errorDisplay: true,
+		})
+
+		
+		//日期选择器
+		layui.use('laydate', function(){
+			var laydate = layui.laydate;
+			
+			//执行一个laydate实例
+			laydate.render({
+				elem: '#startTime', //指定元素
+				type: 'date',
+			done:function(value,date){
+				//value, date, endDate点击日期、清空、现在、确定均会触发。回调返回三个参数，分别代表：生成的值、日期时间对象、结束的日期时间对象
+				startTime = `${value} 00:00:00`
+				endTime = `${value} 23:59:59`
+				console.log(startTime)
+				console.log(endTime)
+			}
+
+			});
+			laydate.render({
+				elem: '#endTime', //指定元素
+				type: 'date',
+			done:function(value,date){
+				//value, date, endDate点击日期、清空、现在、确定均会触发。回调返回三个参数，分别代表：生成的值、日期时间对象、结束的日期时间对象
+				endTime = `${value} 00:00:00`
+			}
+
+			});
+		});
+
+
+
+
+		var total = 0
+
+		//获取实时信息数据
+		let realTimeInFo = function (licensePlateNumber) {
+			$.ajax({
+				method: 'get',
+				url: `${baseUrl}/tracing_the_source_of_straw/vehicle-gps-information/getRealTimeData?licensePlateNumber=${licensePlateNumber}`,
+				success: function (res) {
+					realTimeLicensePlateNumber = res.data.licensePlateNumber
+					realTimeStrawWeight = res.data.strawWeight
+					realTimeSstrawType = res.data.strawType
+
+					$('.strawType').html(res.data.strawType)
+					$('.strawWeight').html(res.data.strawWeight)
+					$('.licensePlateNumber').html(res.data.licensePlateNumber)
+					$('.driverName').html(res.data.driverName)
+					$('.vehicleStatus').html(res.data.vehicleOilWay || res.data.vehicleCircuit == '0' ? '正常' : res.data.vehicleOilWay || res.data.vehicleCircuit == '1' ? '异常' : '' )
+					$('.vehicleOilWay').html(res.data.vehicleOilWay == '0' ? '正常' : res.data.vehicleOilWay == '1' ? '异常' : '' )
+					$('.vehicleCircuit').html(res.data.vehicleCircuit == '0' ? '正常' : res.data.vehicleCircuit == '1' ? '异常' : '' )
+					$('.longitude').html(res.data.longitude)
+					$('.latitude').html(res.data.latitude)
+					$('.updateTime').html(res.data.updateTime)
+
+					$('.vehicleStatus').css('color', res.data.vehicleOilWay || res.data.vehicleCircuit == '0' ? '#7DBC07' : res.data.vehicleOilWay || res.data.vehicleCircuit == '1' ? 'red' : '' )
+					$('.vehicleOilWay').css('color', res.data.vehicleOilWay == '0' ? '#7DBC07' : res.data.vehicleOilWay == '1' ? 'red' : ''  )
+					$('.vehicleCircuit').css('color', res.data.vehicleCircuit == '0' ? '#7DBC07' : res.data.vehicleCircuit == '1' ? 'red' : '' )
+				}
+			})
+		}
+
+
+		//获取车载直播地址
+		let getCarVideoSrc = function () {
+			$.ajax({
+				method: 'get',
+				url: `${baseUrl}/tracing_the_source_of_straw/equipment/getRealTimeVideo`,
+				success: function (res) {
+					res.data.forEach(item => {
+						if(item.name == '车载摄像头'){
+							console.log(item.value)
+							myVideo3.src(item.value)
+							myVideo3.load();
+							myVideo3.play();
+						}
+					})
+					setTimeout(() => {$('#myVideo3').css('width', '99%')}, 1000)
+					setTimeout(() => {$('#myVideo3').css('width', '100%')}, 2000)
+				}
+			})
+		}
+		
+		//获取历史数据
+		let getHistoryData = function (page) {
+			$.ajax({
+				method: 'get',
+				url: `${baseUrl}/tracing_the_source_of_straw/transport-information-sheet/getPolicyInformationHistoryByTime?startTime=${startTime}&endTime=${endTime}&currentPage=${page}&pageSize=${4}`,
+				success: function (res) {
+					if(res.code !== 200){
+						return
+					}
+					document.getElementById('historyDataUl').innerHTML = ''
+					total = res.data.totalCount
+					historyList = res.data.pageData
+					res.data.pageData.forEach((item,index) => {
+						let Li = document.createElement('li')
+						Li.innerHTML = `<span class="xvHao">${index + 1}</span>
+										<span class="shuLiang">3</span>
+										<span class="zhongLiang">${item.strawWeight}</span>
+										<span class="zhongLei">${item.strawType}</span>
+										<span class="chePai">${item.licensePlateNumber}</span>
+										<span class="siJi">${item.driverName}</span>
+										<span class="kaiShi">${item.fillingInTime}</span>
+										<span class="jieShu">${item.updateTime ? item.updateTime : ' '}</span>
+										<span class="qiShi">${item.startGps}</span>
+										<span class="zhongDian">${item.endGps}</span>
+										<b index=${index} class="li_caoZuo" style="color:#05E88B;cursor: pointer;flex:1.5;z-index:9999">
+											播放
+											<img index=${index} src="tool/img/play.png" width="15" height="15" style="margin:-2px 0 0 2px;z-index:9998" alt="">
+										</b>`
+						document.getElementById('historyDataUl').appendChild(Li)
+					})
+
+								//分页组件
+					layui.use('laypage', function(){
+						var laypage = layui.laypage;
+					
+						//执行一个laypage实例
+						laypage.render({
+							elem: 'page', //注意，这里的 test1 是 ID，不用加 # 号
+							limit:4,
+							count: total, //数据总数，从服务端得到
+							curr: page,
+							prev: '<',
+							next: '>',
+							jump: function (obj, first) {
+								//首次不执行
+								if(!first){
+									//do something
+									getHistoryData(obj.curr)
+								}
+							}
+						});
+					});
+						
+				}
+			})
+		}
+
+		//获取摄像头视频地址
+		let getVideoSrc = function () {
+			$.ajax({
+				method: 'get',
+				url: `${videoSrcBaseUrl}/index/api/getMediaList?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&schema=rtmp`,
+				success: function (res) {
+					console.log(res)
+					let str_1 = `/video/video.html?url=${encodeURIComponent(`ws://10.129.211.228:8080/${res.data[0].app}/${res.data[0].stream}.flv?st=${new Date().getTime()}`)}`
+					document.getElementById('video_1').src = `http://39.104.114.103:8080${str_1}`
+					let str_2 = `/video/video.html?url=${encodeURIComponent(`ws://10.129.211.228:8080/${res.data[1].app}/${res.data[1].stream}.flv?st=${new Date().getTime()}`)}`
+					document.getElementById('video_2').src = `http://39.104.114.103:8080${str_2}`
+				}
+			})
+		}
+		
+		//查询历史数据
+		$('#historyDataBtn').on('click',() => {
+			getHistoryData(1)
+		})
+
+		//获取历史视频
+		document.getElementById('historyDataUl').addEventListener('click', (e) => {
+			if(e.target.nodeName.toLowerCase() == 'b' || e.target.nodeName.toLowerCase() == 'img'){
+				let index = e.target.getAttribute('index')
+				console.log(historyList[index])
+				//获取历史视频地址
+				$.ajax({
+					method: 'get',
+					url: `${baseUrl}/tracing_the_source_of_straw/equipment/getHistoricalVideo?startTime=${historyList[index].fillingInTime}&endTime=${historyList[index].updateTime}`,
+					// url: `http://192.168.1.27:18089/tracing_the_source_of_straw/equipment/getHistoricalVideo?startTime=2020-09-12 08:00:00&endTime=2020-11-19 13:41:04`,
+					success: function (res) {
+						if(res.code == 0){
+							console.log(res.data)
+							res.data.forEach(item => {
+								if(item.name == '车载摄像头'){
+									myVideo3.src('item.ip[0]')
+									myVideo3.load();
+									myVideo3.play();
+								}else if(item.name == '海康'){
+									$('#video_1').css('display', 'none')
+									$('#myVideo1').css('display', 'block')
+									myVideoList_1 = item.ip.map(item => item.substring(2, item.indexOf('m3u8') + 4))
+									myVideo1.src({
+										// src: myVideoList_1[0],
+										src: 'http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8',
+										type: 'application/x-mpegURL'
+									})
+								}else if(item.name == '大华'){
+									$('#video_2').css('display', 'none')
+									$('#myVideo2').css('display', 'block')
+									myVideoList_2 = item.ip.map(item => item.substring(2, item.indexOf('m3u8') + 4))
+									myVideo2.src({
+										// src: myVideoList_2[0],
+										src: 'http://ivi.bupt.edu.cn/hls/cctv2hd.m3u8',
+										type: 'application/x-mpegURL'
+									})
+								}
+								
+							})
+						}else{
+							return
+						}
+					}
+				})
+				//获取历史轨迹
+				$.ajax({
+					method: 'get',
+					url: `${baseUrl}/tracing_the_source_of_straw/vehicle-gps-information/getGPSHistoricalTrack?licensePlateNumber=${historyList[index].licensePlateNumber}&startTime=${historyList[index].fillingInTime}&endTime=${historyList[index].updateTime}`,
+					success: function (res) {
+						console.log(res)
+						if(res.code == 0){
+							var marker1
+							var marker
+							var lineArr = []
+							res.data.forEach(item => {
+								lineArr.push(wgs84togcj02(item.split(',')[0] * 1, item.split(',')[1] * 1))
+							})
+							// lineArr = res.data.map(item => item.split(','))
+								// lineArr = [ [ 116.478935, 39.997761 ], [ 116.478939, 39.997825 ], [ 116.478939, 39.997825 ], [ 116.478939, 39.997825 ], [ 116.478939, 39.997825 ], [ 116.478939, 39.997825 ], [ 116.478939, 39.997825 ], [ 116.478939, 39.997825 ], [ 116.478939, 39.997825 ], [ 116.478912, 39.998549 ], [ 116.478912, 39.998549 ], [ 116.478998, 39.998555 ], [ 116.478998, 39.998555 ], [ 116.479282, 39.99856 ], [ 116.479658, 39.998528 ], [ 116.480151, 39.998453 ], [ 116.480784, 39.998302 ], [ 116.480784, 39.998302 ], [ 116.481149, 39.998184 ], [ 116.481573, 39.997997 ], [ 116.481863, 39.997846 ], [ 116.482072, 39.997718 ], [ 116.482362, 39.997718 ], [ 116.483633, 39.998935 ], [ 116.48367, 39.998968 ], [ 116.484648, 39.999861 ] ];
+
+
+							var map = new AMap.Map("container", {
+								resizeEnable : true,
+								center : lineArr[0],
+								mapStyle : "amap://styles/blue", //grey
+								zoom : 17
+							});
+
+
+							marker1 = new AMap.Marker({
+								map : map,
+								position : lineArr[0],
+								offset : new AMap.Pixel(100, -130),
+								content : `<div class='info'><table class='mytable'><tr><td class='td1'></td><td class='td2'>车牌：${historyList[index].licensePlateNumber}</td></tr><tr><td class='td5'></td><td class='td6'>重量：${historyList[index].strawWeight}kg</td></tr><tr><td class='td3'></td><td class='td4'>种类：${historyList[index].strawType}</td></tr></table></div>`, //设置文本标注内容
+							});
+
+
+
+
+							marker = new AMap.Marker({
+								map : map,
+								position : lineArr[0],
+								icon : "tool/img/car2.png",
+								offset : new AMap.Pixel(-26, -13),
+								autoRotation : true,
+								angle : -90,
+							});
+
+
+							// 绘制轨迹
+							var polyline = new AMap.Polyline({
+								map : map,
+								path : lineArr,
+								showDir : true,
+								strokeColor : "#28F", //线颜色
+								strokeOpacity : 1, //线透明度
+								strokeWeight : 5, //线宽
+								strokeStyle : "solid" //线样式
+							});
+
+							var passedPolyline = new AMap.Polyline({
+								map : map,
+								strokeColor : "#AF5", //线颜色
+								strokeOpacity : 1, //线透明度
+								strokeWeight : 6, //线宽
+								strokeStyle : "solid" //线样式
+							});
+
+
+							var startMarker = new AMap.Marker({
+								position : lineArr[0],
+								icon : 'tool/img/start.png',
+								map : map
+							})
+
+							var endMarker = new AMap.Marker({
+								position : lineArr[lineArr.length - 1],
+								icon : 'tool/img/end.png',
+								map : map
+							})
+
+
+							marker.on('moving', function(e) {
+								passedPolyline.setPath(e.passedPath);
+							});
+
+							marker1.on('moving', function(e) {
+								passedPolyline.setPath(e.passedPath);
+							});
+
+							// map.setFitView();
+							
+							startAnimation()
+
+							function startAnimation() {
+								marker.moveAlong(lineArr, 200);
+								marker1.moveAlong(lineArr, 200);
+							}
+
+							function pauseAnimation() {
+								marker.pauseMove();
+								marker1.pauseMove();
+							}
+
+							function resumeAnimation() {
+								marker.resumeMove();
+								marker1.resumeMove();
+							}
+
+							function stopAnimation() {
+								marker.stopMove();
+								marker1.stopMove();
+							}
+						}else{
+							return
+						}
+					}
+				})
+			}else{
+				return
+			}
+		})
+		
+		//获取实时轨迹
+		$('#realTimeBtn').on('click', () => {
+			showRealTimeGis()
+		})
+
+		//显示实施轨迹
+		let showRealTimeGis = function () {
+			var marker
+			var marker1
+								// map.setFitView();
+
+					let realTimeGigInfo = {}
+					var lineArr = []
+					var a = 0;
+					var shishiArr = [];
+					var aArr=[];
+					var map
+					let status
+
+					$.ajax({
+						method: 'get',
+						async: false,
+						url: `${baseUrl}/tracing_the_source_of_straw/vehicle-gps-information/getRealTimeData?licensePlateNumber=${realTimeLicensePlateNumber}`,
+						// url: `http://192.168.1.27:18089/tracing_the_source_of_straw/vehicle-gps-information/getRealTimeData?licensePlateNumber=${realTimeLicensePlateNumber}`,
+						success: function (res) {
+							if(res.code == 0){
+								if(res.data.latitude && res.data.longitude){
+									status = '行驶'
+								}else {
+									status = '熄火'
+								}
+								realTimeGigInfo = res.data
+								console.log(realTimeGigInfo)
+								let trueData = wgs84togcj02(realTimeGigInfo.longitude * 1, realTimeGigInfo.latitude * 1)
+								lineArr = [ trueData ]
+								console.log(lineArr)
+								shishiArr = lineArr
+
+								map = new AMap.Map("container", {
+										resizeEnable : true,
+										center : (status == '行驶') ? lineArr[0] : [116.5, 39.32],
+										mapStyle : "amap://styles/blue", //grey
+										zoom : 17
+									});
+
+									marker = new AMap.Marker({
+										map : map,
+										position : (status == '行驶') ? lineArr[0] : [116.5, 39.32],
+										icon : "tool/img/car2.png",
+										offset : new AMap.Pixel(-26, -13),
+										autoRotation : true,
+										angle : -90,
+									});
+
+									marker1 = new AMap.Marker({
+										map : map,
+										position : (status == '行驶') ? lineArr[0] : [116.5, 39.32],
+										offset : new AMap.Pixel(100, -130),
+										content : `<div class='info'>
+														<table class='mytable'>
+															<tr><td class='td1'></td><td class='td2'>车牌：${realTimeLicensePlateNumber}</td></tr>
+															<tr><td class='td5'></td><td class='td6'>重量：${realTimeStrawWeight}kg</td></tr>
+															<tr><td class='td3'></td><td class='td4'>种类：${realTimeSstrawType}</td></tr>
+															<tr><td class='td7'></td><td id='td8' class='td8'>状态：${status}</td></tr>
+														</table>
+													</div>`, //设置文本标注内容
+									});
+								
+							}else{
+								return
+							}
+						}
+					})
+
+					// var lineArr = [ [ 116.478935, 39.997761 ], [ 116.478939, 39.997825 ], [ 116.478912, 39.998549 ], [ 116.478912, 39.998549 ], [ 116.478998, 39.998555 ], [ 116.478998, 39.998555 ], [ 116.479282, 39.99856 ], [ 116.479658, 39.998528 ], [ 116.480151, 39.998453 ], [ 116.480784, 39.998302 ], [ 116.480784, 39.998302 ], [ 116.481149, 39.998184 ], [ 116.481573, 39.997997 ], [ 116.481863, 39.997846 ], [ 116.482072, 39.997718 ], [ 116.482362, 39.997718 ], [ 116.483633, 39.998935 ], [ 116.48367, 39.998968 ], [ 116.484648, 39.999861 ] ];
+
+					
+					console.log(lineArr)
+						setInterval(() => {
+
+							$.ajax({
+								method: 'get',
+								url: `${baseUrl}/tracing_the_source_of_straw/vehicle-gps-information/getRealTimeData?licensePlateNumber=${realTimeLicensePlateNumber}`,
+							// url: `http://192.168.1.27:18089/tracing_the_source_of_straw/vehicle-gps-information/getRealTimeData?licensePlateNumber=${realTimeLicensePlateNumber}`,
+								success: function (res) {
+									if(res.code == 0){
+										if(res.data.latitude && res.data.longitude){
+											status = '行驶'
+											$('#td8').html(`状态：${status}`)
+											realTimeGigInfo = res.data
+											lineArr.push(wgs84togcj02(realTimeGigInfo.longitude * 1, realTimeGigInfo.latitude * 1))
+										}else {
+											status = '熄火'
+											$('#td8').html(`状态：${status}`)
+											
+											return
+										}
+										// lineArr.push([realTimeGigInfo.longitude, realTimeGigInfo.latitude])
+										// console.log(lineArr)
+										
+									}else{
+										return
+									}
+								}
+							})
+								
+							if (a > 0) {
+								shishiArr = [];
+								shishiArr.push(lineArr[a - 1]);
+								shishiArr.push(lineArr[a]);
+
+							} else {
+								shishiArr.push(lineArr[a]);
+							}
+
+							aArr.push(lineArr[a]);
+							
+							passedPolyline = new AMap.Polyline({
+								map : map,
+								path: aArr,
+								strokeColor : "#AF5", //线颜色
+								// strokeOpacity: 1,     //线透明度
+								strokeWeight : 6, //线宽
+							});
+
+
+							marker.on('moving', function(e) {
+								passedPolyline.setPath(e.passedPath);
+							});
+							
+							marker1.on('moving', function(e) {
+								passedPolyline.setPath(e.passedPath);
+							});
+							
+							// document.getElementById("jwd").value="当前经纬度："+lineArr[a];
+
+							// if (a > 18) {
+							// 	a = 0;
+							// }
+							a++;
+								
+							if(status == '行驶'){
+								marker.moveAlong(shishiArr, 200);
+								marker1.moveAlong(shishiArr, 200);
+							}
+								
+							
+						}, 5000);
+
+
+					
+
+						
+					var passedPolyline;
+		}
+
+
+
+		// //获取直播地址
+		getCarVideoSrc()
+		// //获取实时信息数据
+		realTimeInFo('湘N1F967')
+		setInterval(() => {
+			realTimeInFo('湘N1F967')
+		}, 5000)
+		
+		//获取历史数据
+		getHistoryData(1)
+
+		//获取摄像头视频地址
+		getVideoSrc()
+		
+		setTimeout(() => {
+			$('#realTimeBtn').click()
+		},1000)
+
+		// console.log(document.getElementsByClassName("layui-disabled"))
+
+	}
+</script>

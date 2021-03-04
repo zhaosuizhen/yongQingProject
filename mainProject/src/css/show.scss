@@ -1,0 +1,44 @@
+//body{
+//  overflow-x: hidden;
+//  background: url("./assets/images/bg.jpg") no-repeat fixed right top / 100% 100%;
+//}
+//头部样式
+.el-header {
+  padding: 0 !important;
+  width: 100%;
+  line-height: 70px;
+  .el-row{
+    margin: auto;
+    width: 100%;
+  }
+  .logo {
+    position: absolute;
+    left: 33.5%;
+    text-align: center;
+    background-image: url(./assets/images/bgTitle.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    div {
+      width: 86%;
+      margin: auto;
+      height: 60px;
+      line-height: 50px;
+    }
+  }
+  .logo-img {
+    //width: 25%;
+    padding-right: 1%;
+    vertical-align: middle;
+  }
+  .logo-title {
+    vertical-align: middle;
+    //color: #fff;
+    font-weight: bold;
+    font-size: 34px;
+    letter-spacing: 2px;
+    background: linear-gradient(to top, #2DB9FD, #D6FAFF);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}
